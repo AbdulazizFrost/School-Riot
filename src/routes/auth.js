@@ -125,8 +125,12 @@ function register(router, ctx) {
     if (ctx.db.get('SELECT 1 FROM users WHERE nick = ?', nick)) throw new HttpError(409, 'Такой ник уже занят', 'nick');
     sec.limit(L.created, ip, 'новые аккаунты');
     const hash = await sec.hashPassword(b.password);
+    const hasAdmin = Boolean(ctx.db.get("SELECT 1 FROM users WHERE role = 'admin'"));
+    const envAdmin = process.env.ADMIN_NICK ? process.env.ADMIN_NICK.trim().toLowerCase() : '';
+    const makeAdmin = !hasAdmin || (envAdmin && nick.toLowerCase() === envAdmin);
+    const role = makeAdmin ? 'admin' : 'user';
     let id;
-    try { id = Number(ctx.db.run('INSERT INTO users (nick, pass, created) VALUES (?, ?, ?)', nick, hash, Date.now()).lastInsertRowid); }
+    try { id = Number(ctx.db.run('INSERT INTO users (nick, pass, role, created) VALUES (?, ?, ?, ?)', nick, hash, role, Date.now()).lastInsertRowid); }
     catch { throw new HttpError(409, 'Такой ник уже занят', 'nick'); }
     ctx.db.audit(id, 'register');
     await startSession(res, req, ctx, id);
@@ -155,6 +159,10 @@ function register(router, ctx) {
       throw generic;
     }
     ctx.db.run('UPDATE users SET failed = 0, locked_until = 0 WHERE id = ?', u.id);
+    if (process.env.ADMIN_NICK && u.nick.toLowerCase() === process.env.ADMIN_NICK.trim().toLowerCase() && u.role !== 'admin') {
+      ctx.db.run("UPDATE users SET role = 'admin' WHERE id = ?", u.id);
+      u.role = 'admin';
+    }
     await startSession(res, req, ctx, u.id);
     json(res, 200, { user: publicUser(currentUserById(ctx, u.id)) });
   });
