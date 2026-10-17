@@ -1,0 +1,41 @@
+# The site as a system service (systemd): starts with the server, restarts if it ever stops.
+# setup.sh puts it in /etc/systemd/system/ with the real address filled in.
+[Unit]
+Description=School Riot website
+After=network.target
+
+[Service]
+Type=simple
+User=schoolriot
+Group=schoolriot
+WorkingDirectory=/opt/school-riot
+ExecStart=/usr/bin/node --disable-warning=ExperimentalWarning /opt/school-riot/server.js
+Restart=always
+RestartSec=3
+# only nginx on this machine talks to it; the database and uploads live outside the program's folder
+Environment=HOST=127.0.0.1
+Environment=PORT=8080
+Environment=PUBLIC_URL=__PUBLIC_URL__
+Environment=TRUST_PROXY=1
+Environment=DATA_DIR=/var/lib/school-riot
+Environment=NODE_ENV=production
+
+# the service may write only its data folder; everything else of the system is read-only or hidden to it
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+ReadWritePaths=/var/lib/school-riot
+CapabilityBoundingSet=
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

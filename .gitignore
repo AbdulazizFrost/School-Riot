@@ -1,0 +1,4 @@
+# the database, uploaded files and the server's secret key: never published
+data/
+# the game's archives are big: uploaded to the server separately
+downloads/*.zip

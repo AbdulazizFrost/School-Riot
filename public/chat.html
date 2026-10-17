@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Чат — School Riot</title>
+  <meta name="theme-color" content="#050a17">
+  <link rel="icon" href="/img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/app.js" defer></script>
+  <script src="/js/chat.js" defer></script>
+</head>
+<body data-page="chat">
+<main class="wrap">
+  <div class="page-head">
+    <span class="caption">Сообщество</span>
+    <h1>Чат игроков</h1>
+    <p>Общайся, ищи напарников для игры по сети, делись моментами. Писать могут все, у кого есть аккаунт.</p>
+  </div>
+  <div class="split">
+    <section class="panel flat chat" aria-label="Чат">
+      <div class="chat-head">
+        <h3>Общий чат</h3>
+        <span class="online" id="online"><i></i>—</span>
+      </div>
+      <div class="messages" id="messages" aria-live="polite"></div>
+      <div id="compose"></div>
+    </section>
+    <aside class="panel">
+      <span class="caption">Правила чата</span>
+      <h3>Коротко</h3>
+      <hr class="rule">
+      <ul class="facts small">
+        <li>Без оскорблений, травли и угроз</li>
+        <li>Без спама, рекламы и ссылок на чужие сайты</li>
+        <li>Не публикуй личные данные — свои и чужие</li>
+        <li>Не проси и не давай пароли</li>
+        <li>За нарушения — блокировка</li>
+      </ul>
+      <p class="small dim">Полные правила — <a href="/rules">здесь</a>. Нашёл баг — лучше <a href="/bugs">отправь отчёт</a>, там можно приложить видео.</p>
+    </aside>
+  </div>
+</main>
+</body>
+</html>

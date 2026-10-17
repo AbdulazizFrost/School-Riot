@@ -1,0 +1,15 @@
+{
+  "name": "school-riot-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "School Riot: сайт игры — скачивание, аккаунты, чат, отчёты о багах, отзывы",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server.js",
+    "admin": "node --disable-warning=ExperimentalWarning scripts/admin.js",
+    "test": "node --disable-warning=ExperimentalWarning scripts/selftest.js"
+  }
+}

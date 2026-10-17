@@ -1,0 +1,26 @@
+{
+  "port": 8080,
+  "host": "0.0.0.0",
+  "publicUrl": "",
+  "trustProxy": false,
+  "youtube": {
+    "channel": "https://www.youtube.com/@AZ_Forge",
+    "trailerId": "v_mdrKkRnig"
+  },
+  "instagram": "https://www.instagram.com/azforge.games/",
+  "game": {
+    "version": "0.9",
+    "requirements": [
+      "Windows 10 / 11, 64 бит",
+      "4 ГБ оперативной памяти",
+      "Видеокарта с DirectX 12 (подойдёт встроенная)",
+      "1 ГБ места на диске"
+    ]
+  },
+  "limits": {
+    "imageMB": 10,
+    "videoMB": 100,
+    "filesPerReport": 5,
+    "uploadMBPerDay": 400
+  }
+}
