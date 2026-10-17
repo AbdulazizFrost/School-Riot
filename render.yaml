@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: school-riot
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: ""
+    startCommand: "npm start"
+    envVars:
+      - key: NODE_VERSION
+        value: 22.13.0
+      - key: TRUST_PROXY
+        value: "true"
