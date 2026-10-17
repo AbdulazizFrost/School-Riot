@@ -1,10 +1,13 @@
 [
   {
-    "file": "SchoolRiot_0.9_Windows.zip",
+    "file": "Windows.zip",
+    "url": "https://github.com/AbdulazizFrost/School-Riot/releases/download/v0.9/Windows.zip",
     "title": "School Riot для Windows",
     "version": "0.9",
     "platform": "Windows 10 / 11 (64 бит)",
-    "released": "",
+    "size": 220957500,
+    "sha256": "3dd7baa563364885fbcd3b7b25b2ee2565a22efccd5c2b966c6eca155766e0b8",
+    "released": "17 октября 2026",
     "notes": "Распакуй архив в любую папку и запусти SchoolRiot.exe."
   }
 ]
