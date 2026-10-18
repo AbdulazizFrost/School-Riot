@@ -125,12 +125,11 @@ function register(router, ctx) {
     if (ctx.db.get('SELECT 1 FROM users WHERE nick = ?', nick)) throw new HttpError(409, 'Такой ник уже занят', 'nick');
     sec.limit(L.created, ip, 'новые аккаунты');
     const hash = await sec.hashPassword(b.password);
-    const hasAdmin = Boolean(ctx.db.get("SELECT 1 FROM users WHERE role = 'admin'"));
-    const envAdmin = process.env.ADMIN_NICK ? process.env.ADMIN_NICK.trim().toLowerCase() : '';
-    const makeAdmin = !hasAdmin || (envAdmin && nick.toLowerCase() === envAdmin);
-    const role = makeAdmin ? 'admin' : 'user';
+    // every account starts as a player: administrators are made with the console command or the secret code
+    // (never "the first to register" or "whoever takes a nickname" - on a host whose disk is wiped on restart
+    // that would hand the site to the first stranger after each wipe)
     let id;
-    try { id = Number(ctx.db.run('INSERT INTO users (nick, pass, role, created) VALUES (?, ?, ?, ?)', nick, hash, role, Date.now()).lastInsertRowid); }
+    try { id = Number(ctx.db.run('INSERT INTO users (nick, pass, created) VALUES (?, ?, ?)', nick, hash, Date.now()).lastInsertRowid); }
     catch { throw new HttpError(409, 'Такой ник уже занят', 'nick'); }
     ctx.db.audit(id, 'register');
     await startSession(res, req, ctx, id);
@@ -159,12 +158,28 @@ function register(router, ctx) {
       throw generic;
     }
     ctx.db.run('UPDATE users SET failed = 0, locked_until = 0 WHERE id = ?', u.id);
-    if (process.env.ADMIN_NICK && u.nick.toLowerCase() === process.env.ADMIN_NICK.trim().toLowerCase() && u.role !== 'admin') {
-      ctx.db.run("UPDATE users SET role = 'admin' WHERE id = ?", u.id);
-      u.role = 'admin';
-    }
     await startSession(res, req, ctx, u.id);
     json(res, 200, { user: publicUser(currentUserById(ctx, u.id)) });
+  });
+
+  // Becoming an administrator on a host without a console (Render, ...): the account enters the secret code
+  // set in the host's environment as ADMIN_TOKEN (at least 24 characters, never in the repository). Without
+  // that variable this does nothing. A few tries per hour only.
+  const claimLimit = new sec.RateLimiter(5, 3600000);
+  router.on('POST', '/api/auth/claim-admin', async (req, res) => {
+    sec.checkOrigin(req, ctx.cfg);
+    const u = requireUser(req, ctx);
+    sec.limit(claimLimit, sec.clientIp(req, ctx.cfg), 'код администратора');
+    sec.limit(claimLimit, 'u' + u.id, 'код администратора');
+    const b = await readJson(req);
+    const secret = String(process.env.ADMIN_TOKEN || '');
+    const given = String(b.token || '').slice(0, 200);
+    const ok = secret.length >= 24 &&
+      require('node:crypto').timingSafeEqual(Buffer.from(sec.sha256(given), 'hex'), Buffer.from(sec.sha256(secret), 'hex'));
+    if (!ok) { ctx.db.audit(u.id, 'claim-admin.fail'); throw new HttpError(403, 'Неверный код', 'claim'); }
+    ctx.db.run("UPDATE users SET role = 'admin', banned_until = 0 WHERE id = ?", u.id);
+    ctx.db.audit(u.id, 'claim-admin');
+    json(res, 200, { ok: true });
   });
 
   router.on('POST', '/api/auth/logout', (req, res) => {

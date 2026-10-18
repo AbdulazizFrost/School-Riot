@@ -75,10 +75,10 @@ server.maxHeadersCount = 60;
 
 server.listen(cfg.port, cfg.host, () => {
   console.log(`School Riot site: http://localhost:${cfg.port}  (data: ${path.relative(process.cwd(), cfg.dataDir) || cfg.dataDir})`);
-  if (process.env.ADMIN_NICK) {
-    db.run("UPDATE users SET role = 'admin', banned_until = 0 WHERE nick = ? COLLATE NOCASE", process.env.ADMIN_NICK.trim());
+  if (!db.get("SELECT 1 FROM users WHERE role = 'admin'")) {
+    console.log('No administrator yet: register on the site, then  npm run admin -- make-admin <nick>');
+    console.log('  (no console on the host: set ADMIN_TOKEN to a long secret and enter it on /account#admin)');
   }
-  if (!db.get("SELECT 1 FROM users WHERE role = 'admin'")) console.log('No administrator yet: register an account on the site (the first user becomes admin).');
 });
 
 for (const sig of ['SIGINT', 'SIGTERM']) {

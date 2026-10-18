@@ -147,6 +147,20 @@
     catch (err) { delError.textContent = err.message; }
   });
 
+  if (location.hash === '#admin' && user.role !== 'admin') {
+    const code = el('input', { class: 'input', type: 'password', autocomplete: 'off', maxlength: 200, required: true });
+    const err = el('p', { class: 'form-error', role: 'alert' });
+    const claim = el('form', {}, field('Код администратора', code, 'Секретный код из настроек сервера (ADMIN_TOKEN)'), err,
+      el('button', { class: 'btn', type: 'submit' }, 'Стать администратором'));
+    claim.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      err.textContent = '';
+      try { await api('POST', '/api/auth/claim-admin', { token: code.value }); location.href = '/admin'; }
+      catch (er) { err.textContent = er.message; code.value = ''; }
+    });
+    box.append(el('section', { class: 'panel' }, el('span', { class: 'caption' }, 'Администрация'), el('h3', {}, 'Код администратора'), el('hr', { class: 'rule' }), claim));
+  }
+
   box.append(profile,
     el('section', { class: 'panel' }, el('span', { class: 'caption' }, 'Безопасность'), el('h3', {}, 'Сменить пароль'), el('hr', { class: 'rule' }), pwForm),
     el('section', { class: 'panel' }, el('span', { class: 'caption' }, 'Опасная зона'), el('h3', {}, 'Удалить аккаунт'), el('hr', { class: 'rule' }), delForm));

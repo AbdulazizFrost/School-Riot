@@ -54,6 +54,19 @@ async function register(c, nick, password) {
   check(ra.status === 201 && A.cookie, 'account A registered and logged in');
   const rb = await register(B, 'testB' + stamp, pwB);
   check(rb.status === 201 && B.cookie, 'account B registered and logged in');
+  check(ra.data?.user?.role === 'user' && rb.data?.user?.role === 'user', 'a new account is a player, never an administrator by itself');
+  const claimBad = await B.req('POST', '/api/auth/claim-admin', { body: { token: 'guess-' + stamp } });
+  check(claimBad.status === 403 || claimBad.status === 429, 'a wrong administrator code is refused');
+  if (process.env.TEST_ADMIN_TOKEN) {
+    // (a third account: A and B must stay players for the checks below)
+    const C = new Client('C');
+    const pwC = 'Test-pass-' + stamp + 'C';
+    await register(C, 'testC' + stamp, pwC);
+    const claimOk = await C.req('POST', '/api/auth/claim-admin', { body: { token: process.env.TEST_ADMIN_TOKEN } });
+    const me = await C.req('GET', '/api/me');
+    check(claimOk.status === 200 && me.data.user.role === 'admin', 'the right administrator code makes an administrator');
+    await C.req('POST', '/api/auth/delete', { body: { password: pwC } });
+  }
   const dup = await register(anon, 'TESTA' + stamp, pwA);
   check(dup.status === 409, 'the same nickname in other letters case is taken');
 
